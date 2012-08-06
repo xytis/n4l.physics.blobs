@@ -11,10 +11,14 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import java.text.DecimalFormat;
-import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import n4l.physics.blobs.container.Blob;
+import n4l.physics.blobs.container.BlobContainer;
+
+import n4l.physics.utils.Vector3;
 
 
 /**
@@ -38,6 +42,8 @@ public class MainWindow  extends Canvas  {
 	private BufferStrategy strategy;
 
 	private String AvgFps;
+	
+	private BlobContainer blobs = new BlobContainer();
 
 	/**
 	 * 
@@ -86,13 +92,60 @@ public class MainWindow  extends Canvas  {
 		thread = new MainThread(this);
 		thread.setRunning(true);
 		thread.start();
+		
+		Blob blob[] = new Blob[4];
+		
+		blob[0] = new Blob(new Vector3(300.0,300.0,0), new Vector3(0,0,0));
+		blobs.addItem(blob[0]);
+
+		blob[1] = new Blob(new Vector3(300.0,280.0,0), new Vector3(0,0,0));
+		blobs.addItem(blob[1]);
+
+		
+		blob[2] = new Blob(new Vector3(280.0,280.0,0), new Vector3(0,0,0));
+		blobs.addItem(blob[2]);
+
+		blob[3] = new Blob(new Vector3(280.0,300.0,0), new Vector3(0,0,0));
+		blobs.addItem(blob[3]);
+		
+		blob[0].linkTo(blob[1]);		
+		blob[1].linkTo(blob[2]);
+		blob[2].linkTo(blob[3]);
+		blob[3].linkTo(blob[0]);
+		
+
+		//Blob old_blob = new Blob(new Vector3(10,420,0));
+		//Create blob walls
+		//Top & bottom
+		/*
+		for (int i = 0; i < 40; i++) {
+			blob = new Blob(new Vector3(20 + i*11,420,0));
+			old_blob.linkTo(blob);
+			blobs.addItem(blob);
+			old_blob = blob;
+		}
+		*/
+		/*
+		for (int i = 0; i < 40; i++) {
+			blob = new Blob(new Vector3(20 + i*10,20 + 400,0));
+			blobs.addItem(blob);
+		}
+		for (int i = 1; i < 39; i++) {
+			blob = new Blob(new Vector3(20 ,20 + i*10,0));
+			blobs.addItem(blob);
+		}
+		for (int i = 1; i < 39; i++) {
+			blob = new Blob(new Vector3(20 + 400 ,20 + i*10,0));
+			blobs.addItem(blob);
+		}
+		*/
 	}
 
 	/**
 	 * 
 	 */
-	public void update() {
-		
+	public void update(double dt) {
+		blobs.update(dt);
 	}
 
 	/**
@@ -108,8 +161,8 @@ public class MainWindow  extends Canvas  {
 				(getWidth() - g.getFontMetrics().stringWidth(AvgFps)),
 				(getHeight()));
 		
-		g.drawOval(400, 400, 10, 10);
-		//DrawableRegistry.getInstance().render(g);
+		
+		blobs.render(g);
 
 		g.dispose();
 		strategy.show();

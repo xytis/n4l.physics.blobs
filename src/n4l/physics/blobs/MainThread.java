@@ -20,8 +20,6 @@ public class MainThread extends Thread {
 
 	// desired fps
 	private final static int MAX_FPS = 50;
-	// maximum number of frames to be skipped
-	private final static int MAX_FRAME_SKIPS = 5;
 	// the frame period
 	private final static int FRAME_PERIOD = 1000 / MAX_FPS;
 
@@ -61,14 +59,17 @@ public class MainThread extends Thread {
 		long beginTime; // the time when the cycle begun
 		long timeDiff; // the time it took for the cycle to execute
 		int sleepTime = 0; // ms to sleep (<0 if we're behind)
-		int framesSkipped; // number of frames being skipped
+		
+		double lastTime = System.currentTimeMillis()/1000.0;
+		double deltaTime = 0;
 
 		while (running) {
 			beginTime = System.currentTimeMillis();
+			deltaTime = beginTime/1000.0 - lastTime;
+			lastTime = beginTime/1000.0;
 
-			framesSkipped = 0; // resetting the frames skipped
 			// update game state
-			this.mainWindow.update();
+			this.mainWindow.update(deltaTime);
 
 			// render state to the screen
 			// draws the canvas on the panel
@@ -81,20 +82,11 @@ public class MainThread extends Thread {
 			sleepTime = (int) (FRAME_PERIOD - timeDiff);
 
 			if (sleepTime > 0) {
-				// if sleepTime > 0 we're OK
+				// if sleepTime > 0 we're OK to sleep a bit.s
 				try {
 					Thread.sleep(sleepTime);
 				} catch (InterruptedException e) {
 				}
-			}
-
-			while (sleepTime < 0 && framesSkipped < MAX_FRAME_SKIPS) {
-				// we need to catch up
-				// update without rendering
-				this.mainWindow.update();
-				// add frame period to check if in next frame
-				sleepTime += FRAME_PERIOD;
-				framesSkipped++;
 			}
 
 			fps.mark();
